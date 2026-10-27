@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Тест: Упаковка и маркировка — спецслучаи</title>
+<style>
+  :root { --ink:#172033; --muted:#64748b; --blue:#2457d6; --pale:#eef4ff; --green:#137547; --red:#b42318; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:Arial,Helvetica,sans-serif; background:linear-gradient(135deg,#eef4ff,#f8fafc 55%,#e8f7f0); color:var(--ink); line-height:1.5; }
+  .wrap { max-width:900px; margin:0 auto; padding:28px 16px 48px; }
+  header { background:#fff; border-radius:22px; padding:28px; box-shadow:0 12px 36px #17203312; margin-bottom:20px; }
+  .tag { display:inline-block; background:#e3ecff; color:#214bb7; padding:6px 11px; border-radius:999px; font-size:13px; font-weight:700; }
+  h1 { font-size:clamp(25px,4vw,38px); line-height:1.15; margin:14px 0 10px; }
+  header p { color:var(--muted); margin:0; }
+  .progress-box { margin-top:20px; }
+  .progress-line { height:9px; background:#e7edf5; border-radius:999px; overflow:hidden; }
+  .progress { height:100%; width:0; background:var(--blue); transition:width .2s; }
+  .progress-text { display:flex; justify-content:space-between; color:var(--muted); font-size:13px; margin-bottom:7px; }
+  .question { background:#fff; border-radius:18px; padding:22px; margin:14px 0; box-shadow:0 8px 24px #1720330b; border:1px solid #e7edf5; }
+  .q-top { display:flex; gap:12px; align-items:flex-start; }
+  .num { flex:0 0 36px; height:36px; display:grid; place-items:center; border-radius:11px; background:var(--pale); color:var(--blue); font-weight:800; }
+  h2 { font-size:18px; line-height:1.4; margin:4px 0 16px; }
+  .options { display:grid; gap:9px; }
+  .option { display:flex; gap:11px; align-items:flex-start; padding:12px 14px; border:1px solid #dce3ee; border-radius:12px; cursor:pointer; transition:.15s; }
+  .option:hover { border-color:#8aa7ef; background:#f8faff; }
+  .option input { margin-top:4px; accent-color:var(--blue); }
+  .option.correct { border-color:#6bc49a; background:#effbf4; }
+  .option.wrong { border-color:#f1a39c; background:#fff3f2; }
+  .mark { margin-left:auto; font-weight:800; white-space:nowrap; }
+  .feedback { display:none; font-size:14px; margin-top:12px; padding:11px 13px; border-radius:10px; }
+  .feedback.show { display:block; }
+  .feedback.good { background:#effbf4; color:var(--green); }
+  .feedback.bad { background:#fff3f2; color:var(--red); }
+  .actions { display:flex; flex-wrap:wrap; gap:10px; margin:22px 0; }
+  button { border:0; border-radius:12px; padding:13px 18px; font-size:15px; font-weight:700; cursor:pointer; }
+  .primary { color:#fff; background:var(--blue); box-shadow:0 7px 18px #2457d633; }
+  .secondary { color:#26334a; background:#fff; border:1px solid #d8e0ec; }
+  button:hover { filter:brightness(.97); }
+  #result { display:none; background:#fff; border-radius:20px; padding:25px; box-shadow:0 12px 36px #17203312; text-align:center; }
+  #score { font-size:42px; font-weight:800; color:var(--blue); margin:8px 0; }
+  .note { font-size:12px; color:var(--muted); text-align:center; margin-top:24px; }
+  @media(max-width:560px) { header,.question { padding:18px; } .option { padding:11px; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <span class="tag">УЧЕБНЫЙ ТЕСТ · 15 ВОПРОСОВ</span>
+    <h1>Упаковка и маркировка: спецслучаи</h1>
+    <p>Выберите один вариант ответа в каждом вопросе. После проверки сайт покажет правильные ответы и ваш результат.</p>
+    <div class="progress-box">
+      <div class="progress-text"><span>Заполнено вопросов</span><span id="progressLabel">0 из 15</span></div>
+      <div class="progress-line"><div class="progress" id="progress"></div></div>
+    </div>
+  </header>
+
+  <form id="quiz"></form>
+  <div class="actions">
+    <button type="button" class="primary" id="checkBtn">Проверить ответы</button>
+    <button type="button" class="secondary" id="resetBtn">Начать заново</button>
+  </div>
+  <section id="result" aria-live="polite">
+    <h2>Результат теста</h2>
+    <div id="score"></div>
+    <p id="resultText"></p>
+    <button type="button" class="primary" id="retryBtn">Пройти ещё раз</button>
+  </section>
+  <p class="note">Учебный материал общего характера. Конкретные требования к упаковке и маркировке зависят от вида товара, страны и действующих правил.</p>
+</div>
+
+<script>
+const questions = [
+  {
+    q:"Какова главная задача упаковки при перевозке товара?",
+    a:["Только сделать товар привлекательнее","Защитить товар от повреждений и облегчить обращение с ним","Заменить все сопроводительные документы","Скрыть сведения о производителе"],
+    c:1, e:"Упаковка защищает товар при хранении и транспортировке, а также может облегчать погрузку и обращение."
+  },
+  {
+    q:"Что в первую очередь следует проверить перед нанесением маркировки на товар?",
+    a:["Что текст соответствует товару и обязательным требованиям","Что этикетка ярче упаковки","Что на этикетке как можно меньше информации","Что указан только магазин-продавец"],
+    c:0, e:"Маркировка должна быть достоверной, читаемой и соответствовать применимым требованиям."
+  },
+  {
+    q:"Как следует поступить, если маркировка повреждена и стала нечитаемой до отправки?",
+    a:["Отправить товар как обычно","Заклеить повреждение любым листом бумаги","Восстановить корректную и читаемую маркировку до отправки","Удалить все обозначения"],
+    c:2, e:"До отправки необходимо обеспечить наличие корректной и читаемой маркировки."
+  },
+  {
+    q:"Что обычно означает знак с изображением бокала и вилки на упаковке?",
+    a:["Товар хрупкий при любом обращении","Материал предназначен для контакта с пищевыми продуктами","Упаковку нужно хранить в морозильнике","Товар нельзя перевозить автомобилем"],
+    c:1, e:"Бокал и вилка обычно обозначают пригодность материала для контакта с пищевыми продуктами."
+  },
+  {
+    q:"Какой знак указывает, что груз нужно беречь от влаги?",
+    a:["Зонт или капли воды в соответствующем обозначении","Изображение солнца","Изображение двух стрелок вверх","Изображение бокала и вилки"],
+    c:0, e:"Обозначение защиты от влаги предупреждает о необходимости не допускать намокания груза."
+  },
+  {
+    q:"Что означает манипуляционный знак с двумя стрелками, направленными вверх?",
+    a:["Не кантовать ни при каких условиях","Верх упаковки должен находиться в указанном положении","Разрешено штабелировать без ограничений","Упаковку нужно вскрыть перед перевозкой"],
+    c:1, e:"Стрелки вверх показывают правильное вертикальное положение упаковки при обращении с грузом."
+  },
+  {
+    q:"Какой подход правильный для маркировки опасного груза?",
+    a:["Использовать только рекламную наклейку","Указать сведения произвольно, по усмотрению отправителя","Применять предусмотренные для данного груза знаки и документы по действующим правилам","Не наносить маркировку, если упаковка закрыта"],
+    c:2, e:"Для опасных грузов применяют установленные классификационные обозначения, маркировку и документы."
+  },
+  {
+    q:"Что важно при маркировке хрупкого товара?",
+    a:["Нанести предупреждение о хрупкости и обеспечить подходящую защитную упаковку","Использовать только прозрачную упаковку","Указать лишь цену товара","Считать предупреждающий знак заменой защитного материала"],
+    c:0, e:"Предупреждающая маркировка помогает при обращении, но не заменяет физическую защиту товара."
+  },
+  {
+    q:"Что следует сделать, если фактическое содержимое коробки не совпадает с маркировкой?",
+    a:["Оставить маркировку без изменений","Исправить маркировку и проверить соответствие содержимого документам до отправки","Добавить несколько случайных этикеток","Стереть номер партии и отправить товар"],
+    c:1, e:"Маркировка, фактическое содержимое и сопроводительные документы должны согласовываться."
+  },
+  {
+    q:"Для чего на упаковке указывают номер партии, если это предусмотрено требованиями?",
+    a:["Чтобы заменить наименование товара","Чтобы обозначить цвет упаковки","Чтобы обеспечить идентификацию партии и прослеживаемость товара","Чтобы указать маршрут водителя"],
+    c:2, e:"Номер партии помогает идентифицировать продукцию и отслеживать её движение."
+  },
+  {
+    q:"Как следует поступить с товаром, требующим специального температурного режима?",
+    a:["Указать и соблюдать необходимый режим хранения и перевозки","Полностью отказаться от маркировки","Всегда хранить при комнатной температуре","Ориентироваться только на цвет коробки"],
+    c:0, e:"Для температурно-чувствительных товаров нужно соблюдать применимые условия хранения и перевозки и указывать их, когда это требуется."
+  },
+  {
+    q:"Какой принцип важен при размещении этикетки на внешней упаковке?",
+    a:["Размещать её только внутри коробки","Закрывать этикетку упаковочной лентой","Делать сведения читаемыми и размещать их так, чтобы их можно было проверить","Наносить текст поверх сгибов, чтобы он был незаметен"],
+    c:2, e:"Этикетка должна оставаться доступной для осмотра и читаемой при обычном обращении с упаковкой."
+  },
+  {
+    q:"Что обычно требуется при повторном использовании упаковки, если на ней осталась старая маркировка?",
+    a:["Оставить старые данные независимо от содержимого","Удалить или закрыть неверные старые сведения и нанести актуальную маркировку","Добавить новую маркировку рядом, не проверяя старую","Снять все предупреждающие знаки"],
+    c:1, e:"Старая информация не должна вводить в заблуждение; актуальные сведения должны соответствовать новому содержимому."
+  },
+  {
+    q:"Почему нельзя произвольно изменять предупреждающие символы на упаковке?",
+    a:["Потому что символы должны передавать установленное значение и не вводить в заблуждение","Потому что все символы обязаны быть красными","Потому что символы нужны только для украшения","Потому что их значение зависит только от дизайнера"],
+    c:0, e:"Предупреждающие символы несут конкретную информацию об обращении с грузом и должны использоваться корректно."
+  },
+  {
+    q:"Как лучше поступить, если для конкретного товара требования к маркировке неясны?",
+    a:["Придумать собственные обязательные символы","Скопировать маркировку похожего товара без проверки","Проверить применимые нормативные требования и документацию на товар","Отправить товар без проверки"],
+    c:2, e:"Требования могут зависеть от товара, назначения, страны и способа перевозки, поэтому их нужно проверить по применимым правилам."
+  }
+];
+
+const quiz = document.getElementById('quiz');
+const progress = document.getElementById('progress');
+const progressLabel = document.getElementById('progressLabel');
+const result = document.getElementById('result');
+
+function renderQuiz() {
+  quiz.innerHTML = questions.map((item, i) => `
+    <section class="question" id="question-${i}">
+      <div class="q-top">
+        <div class="num">${i + 1}</div>
+        <div style="flex:1">
+          <h2>${item.q}</h2>
+          <div class="options">
+            ${item.a.map((answer, j) => `
+              <label class="option" data-option="${j}">
+                <input type="radio" name="q${i}" value="${j}">
+                <span>${String.fromCharCode(65+j)}. ${answer}</span>
+                <span class="mark"></span>
+              </label>`).join('')}
+          </div>
+          <div class="feedback" id="feedback-${i}"></div>
+        </div>
+      </div>
+    </section>`).join('');
+  quiz.addEventListener('change', updateProgress);
+}
+function updateProgress() {
+  const count = questions.filter((_, i) => quiz.querySelector(`input[name="q${i}"]:checked`)).length;
+  progressLabel.textContent = `${count} из ${questions.length}`;
+  progress.style.width = `${count / questions.length * 100}%`;
+}
+function checkAnswers() {
+  let score = 0;
+  questions.forEach((item, i) => {
+    const selected = quiz.querySelector(`input[name="q${i}"]:checked`);
+    const card = document.getElementById(`question-${i}`);
+    const feedback = document.getElementById(`feedback-${i}`);
+    card.querySelectorAll('.option').forEach((label, j) => {
+      label.classList.remove('correct', 'wrong');
+      label.querySelector('.mark').textContent = '';
+      const input = label.querySelector('input');
+      input.disabled = true;
+      if (j === item.c) {
+        label.classList.add('correct');
+        label.querySelector('.mark').textContent = '✓ Правильно';
+      }
+      if (selected && Number(selected.value) === j && j !== item.c) {
+        label.classList.add('wrong');
+        label.querySelector('.mark').textContent = '✗ Ваш ответ';
+      }
+    });
+    if (selected && Number(selected.value) === item.c) score++;
+    feedback.className = 'feedback show ' + (selected && Number(selected.value) === item.c ? 'good' : 'bad');
+    feedback.textContent = (selected ? (Number(selected.value) === item.c ? 'Верно. ' : 'Неверно. ') : 'Ответ не выбран. ') + item.e;
+  });
+  document.getElementById('score').textContent = `${score} / ${questions.length} · ${Math.round(score / questions.length * 100)}%`;
+  document.getElementById('resultText').textContent =
+    score >= 13 ? 'Отличный результат! Вы хорошо разбираетесь в теме.' :
+    score >= 10 ? 'Хорошая работа. Повторите вопросы, в которых были ошибки.' :
+    score >= 7 ? 'Есть основы, но стоит ещё раз изучить специальные случаи упаковки и маркировки.' :
+    'Рекомендуем повторить тему и пройти тест ещё раз.';
+  result.style.display = 'block';
+  document.getElementById('checkBtn').disabled = true;
+  result.scrollIntoView({behavior:'smooth', block:'center'});
+}
+function resetQuiz() {
+  renderQuiz();
+  result.style.display = 'none';
+  document.getElementById('checkBtn').disabled = false;
+  updateProgress();
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+document.getElementById('checkBtn').addEventListener('click', checkAnswers);
+document.getElementById('resetBtn').addEventListener('click', resetQuiz);
+document.getElementById('retryBtn').addEventListener('click', resetQuiz);
+renderQuiz();
+</script>
+</body>
+</html>
